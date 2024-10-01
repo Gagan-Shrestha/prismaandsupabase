@@ -1,0 +1,121 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "cockroachdb"
+    url      = env("DATABASE_URL")
+}
+
+model SimpleFormData {
+    id        Int      @id @default(sequence())
+    simepleId String   @default(uuid())
+    fullName  String
+    date      String?
+    address   String?
+    gender    String?
+    createdAt DateTime @default(now())
+
+    @@map("simpleFormData")
+}
+
+model ImageUpload {
+    id         Int     @id @default(sequence())
+    imageId    String  @default(uuid())
+    email      String  @unique
+    password   String?
+    photoImage String?
+
+    @@map("imageUpload")
+}
+
+model EmployeeData {
+    id         Int     @id @default(sequence())
+    employeeId String  @default(uuid())
+    name       String  @unique
+    gender     String?
+    photo      String?
+
+    @@map("employeeData")
+}
+
+model EmployeeInfo {
+    id                   Int       @id @default(sequence())
+    employeeId           String    @unique @default(uuid())
+    employeeName         String?
+    gender               String?
+    mobile               String?
+    citizenshipNumber    String?
+    photo                String?
+    documents            String[]
+    createdAt            DateTime  @default(now())
+    lastUpdatedTimeStamp DateTime?
+
+    @@map("employeeInfo")
+}
+
+model Auth {
+    id             Int      @id @default(sequence())
+    userInId       String   @unique @default(uuid())
+    userInEmail    String?  @unique
+    userInPhone    String?  @unique
+    userInPassword String
+    userInName     String?
+    userIsVerify   Boolean  @default(false)
+    validEmail     Boolean  @default(false)
+    userIsApproved Boolean  @default(false)
+    userIsRejected Boolean  @default(false)
+    createdAt      DateTime @default(now())
+    role           Role?
+
+    @@map("auth")
+}
+
+enum Role {
+    Admin
+    Student
+    Teacher
+}
+
+model FiscalYear {
+    id        Int      @id @default(sequence())
+    userInId  String?
+    yearId    String   @unique @default(uuid())
+    name      String?
+    createdAt DateTime @default(now())
+    active    Boolean
+    startDate String?
+    endDate   String?
+    selected  Boolean  @default(false)
+}
+
+model TeacherInfo {
+    id                   Int       @id @default(sequence())
+    teacherInfoId        String    @unique @default(uuid())
+    userInId             String?   @unique
+    userId               String?
+    teacherName          String?
+    teacherPhone         String?
+    teacherEmail         String?   @unique
+    teacherPhoto         String?
+    fiscalYear           String?
+    createdAt            DateTime  @default(now())
+    lastUpdatedTimeStamp DateTime?
+
+    @@map("teacherInfo")
+}
+
+model StudentInfo {
+    id                   Int       @id @default(sequence())
+    studentInfoId        String    @unique @default(uuid())
+    userInId             String?
+    studentName          String?
+    gender               String?
+    mobile               String?
+    photo                String?
+    createdAt            DateTime  @default(now())
+    lastUpdatedTimeStamp DateTime?
+    fiscalYear           String?
+
+    @@map("studentInfo")
+}

@@ -1,12 +1,15 @@
-import Login from "@/components/CoreComponent/Login/Login";
-import RegistrationAdmin from "@/components/CoreComponent/Register/RegisterAdminUser";
-import Image from "next/image";
+/** @format */
 
-export default function Home() {
+import RegistrationAdmin from "@/components/CoreComponent/Register/RegisterAdminUser";
+import dynamic from "next/dynamic";
+import React from "react";
+
+function page() {
   return (
     <div>
-      <Login />
       <RegistrationAdmin />
     </div>
   );
 }
+
+export default page;
