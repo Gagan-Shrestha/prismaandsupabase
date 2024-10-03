@@ -102,10 +102,10 @@ const menuItems: MenuItem[] = [
         component: "setupteacher",
       },
       {
-        titleKey: "Record",
+        titleKey: "Add Bulk Teacher",
         icon: <FaRegFileAlt />,
         link: "#",
-        component: "notificationForm",
+        component: "setupBulkteacher",
       },
       {
         titleKey: "Schedule",
