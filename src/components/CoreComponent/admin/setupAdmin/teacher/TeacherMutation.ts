@@ -1,7 +1,11 @@
 /** @format */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTeacher, deleteTeacher } from "./TeacherServer";
+import {
+  createTeacher,
+  createTeacherBulk,
+  deleteTeacher,
+} from "./TeacherServer";
 
 export default function useTeacherMutation() {
   const queryClient = useQueryClient();
@@ -17,8 +21,15 @@ export default function useTeacherMutation() {
       queryClient.invalidateQueries({ queryKey: ["teacher"] });
     },
   });
+  const { mutateAsync: addBulkTeacher } = useMutation({
+    mutationFn: createTeacherBulk,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teacher"] });
+    },
+  });
   return {
     addTeacherData,
     deleteTeacherData,
+    addBulkTeacher,
   };
 }

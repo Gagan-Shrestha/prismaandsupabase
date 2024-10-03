@@ -84,7 +84,7 @@ const TeacherTable = () => {
   const [selectManager, setSelectManager] = useState<any>(null); // Track selected teacher for editing
   const [managerId, setManagerId] = useState(""); // Holds the teacher data array
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleAddAssetManager = () => {
+  const handleAddTeacher = () => {
     setSelectManager(null);
     setIsModalOpen(true);
   };
@@ -115,11 +115,11 @@ const TeacherTable = () => {
       {/* Button to open the modal */}
       <div className="m-2 flex justify-end">
         <button
-          onClick={handleAddAssetManager}
+          onClick={handleAddTeacher}
           className="bg-blue-700 flex space-x-2 text-xs mb-2 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300"
         >
           <IoMdAddCircle size={16} className="my-auto" />
-          <span>Add Asset Teacher</span>
+          <span>Add Teacher</span>
         </button>
       </div>
 

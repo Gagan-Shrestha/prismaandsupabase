@@ -192,3 +192,119 @@ export const deleteTeacher = async (teacherId: string) => {
     return { error: "Failed to delete teacher" };
   }
 };
+export const createTeacherBulk = async (teacherDetails: string) => {
+  try {
+    const user = await validateAdmin();
+    if (user?.error) {
+      return { error: user?.error };
+    }
+
+    if (!teacherDetails) {
+      return { error: "No data provided" };
+    }
+
+    const parsedDetails = JSON.parse(teacherDetails);
+
+    const createdData: string[] = [];
+    const failedData: string[] = [];
+
+    try {
+      const result = await prisma.$transaction(
+        async (prisma) => {
+          // Loop through each teacher object and add them sequentially
+          for (let index = 0; index < parsedDetails.length; index++) {
+            const detailsObj = parsedDetails[index];
+
+            if (detailsObj) {
+              const { teacherName, teacherPhone, teacherEmail } = detailsObj;
+
+              // Skip if critical information is missing
+              if (!teacherName || !teacherPhone || !teacherEmail) {
+                failedData.push(teacherName || "Unnamed Teacher");
+                continue;
+              }
+
+              // Check if the user already exists in the auth table based on email
+              const existingUser = await prisma.auth.findFirst({
+                where: {
+                  userInEmail: teacherEmail.toLowerCase(),
+                },
+              });
+
+              // If the user exists and is already a Teacher, skip this entry
+              if (existingUser && existingUser.role === "Teacher") {
+                failedData.push(teacherName);
+                continue;
+              }
+
+              // If no existing user, create a new teacher
+              if (!existingUser) {
+                const hashedPassword = await bcrypt.hash(teacherPhone, 12);
+
+                const newUser = await prisma.auth.create({
+                  data: {
+                    userInEmail: teacherEmail.toLowerCase(),
+                    userInPassword: hashedPassword,
+                    userInPhone: teacherPhone,
+                    userInName: teacherName,
+                    validEmail: true,
+                    role: "Teacher",
+                  },
+                });
+
+                if (!newUser) {
+                  failedData.push(teacherName);
+                  continue;
+                }
+
+                const currentFiscalYear = await prisma.fiscalYear.findFirst({
+                  where: { active: true },
+                });
+
+                const teacherInfo = await prisma.teacherInfo.create({
+                  data: {
+                    teacherName,
+                    teacherEmail: teacherEmail.toLowerCase(),
+                    teacherPhone,
+                    userId: user?.userId,
+                    userInId: newUser?.userInId,
+                    fiscalYear: currentFiscalYear?.yearId,
+                  },
+                });
+
+                if (teacherInfo) {
+                  createdData.push(teacherName);
+                } else {
+                  failedData.push(teacherName);
+                }
+              } else {
+                failedData.push(teacherName);
+              }
+            }
+          }
+          return { success: "Teachers processed successfully" };
+        },
+        {
+          maxWait: 5000, // default: 2000
+          timeout: 12000, // default: 5000
+        }
+      );
+
+      // Return success message or errors
+      if (createdData.length === parsedDetails.length) {
+        return { success: "All teachers added successfully" };
+      } else {
+        return {
+          error:
+            "Failed to create some teachers. Failed entries: " +
+            failedData.join(", "),
+        };
+      }
+    } catch (error) {
+      return { error: "Error: " + error };
+    }
+  } catch (error) {
+    console.error("Error creating or updating teachers:", error);
+    return { status: 500, error: "Failed to create teachers" };
+  }
+};
