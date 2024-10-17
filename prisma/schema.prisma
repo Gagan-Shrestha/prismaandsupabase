@@ -119,3 +119,125 @@ model StudentInfo {
 
     @@map("studentInfo")
 }
+
+model Applicant {
+    id                  Int              @id @default(sequence())
+    applicantId         String           @unique @default(uuid())
+    name                String
+    customId            String?
+    userId              String?
+    fiscalYear          String?
+    companyId           String?
+    email               String?
+    secondaryEmail      String?
+    phoneNumber         String?
+    secondaryPhone      String?
+    dateOfBirth         String?
+    gender              Gender?          @default(Other)
+    reference           String?
+    interestedCountries String?
+    interestedCourse    String?
+    tags                String?
+    counselor           String?
+    quickAppointment    Boolean          @default(false)
+    checkboxEmail       Boolean          @default(false)
+    applicationType     ApplicationType? @default(Leads)
+    address             Address?
+    academicRecords     AcademicRecord[]
+    testScores          TestScore[]
+    documents           Document[]
+    summary             String?
+    createdAt           DateTime         @default(now())
+    updatedAt           DateTime         @updatedAt
+}
+
+model Address {
+    id           Int       @id @default(sequence())
+    addressId    String    @unique @default(uuid())
+    countryName  String?
+    city         String?
+    state        String?
+    district     String?
+    municipality String?
+    zipPostal    String?
+    street       String?
+    applicantId  String    @unique
+    applicant    Applicant @relation(fields: [applicantId], references: [applicantId])
+}
+
+model AcademicRecord {
+    id          Int        @id @default(sequence())
+    academicId  String     @unique @default(uuid())
+    institution String?
+    degreeTitle String?
+    degreeLevel String?
+    passedYear  String?
+    courseStart String?
+    courseEnd   String?
+    subject     String?
+    percentage  Float?
+    gpa         Float?
+    gradeType   GradeType?
+    applicantId String
+    applicant   Applicant  @relation(fields: [applicantId], references: [applicantId])
+}
+
+model TestScore {
+    id           Int       @id @default(sequence())
+    testId       String    @unique @default(uuid())
+    testType     String?
+    overall      String?
+    listening    String?
+    reading      String?
+    writing      String?
+    speaking     String?
+    attendedDate String?
+    applicantId  String
+    applicant    Applicant @relation(fields: [applicantId], references: [applicantId])
+}
+
+model Document {
+    id          Int       @id @default(sequence())
+    documentId  String    @unique @default(uuid())
+    fileUrl     String?
+    applicantId String
+    applicant   Applicant @relation(fields: [applicantId], references: [applicantId])
+}
+
+enum Gender {
+    Male
+    Female
+    Other
+}
+
+enum GradeType {
+    percentage
+    gpa
+}
+
+enum ApplicationType {
+    Leads
+    Inquiring
+    ClassEnrollment
+    AbroadEnrollment
+}
+
+model ManagerInfo {
+    id                   Int       @id @default(sequence())
+    assetManagerInfoId   String    @unique @default(uuid())
+    userInId             String?   @unique
+    userId               String?
+    managerName          String?
+    managerPhone         String?
+    userName             String?   @unique
+    managerPassword      String?
+    linkedAccount        String?
+    managerEmail         String?   @unique
+    associatedLocation   String[]
+    managerPhoto         String?
+    fiscalYear           String?
+    createdAt            DateTime  @default(now())
+    lastUpdatedTimeStamp DateTime?
+
+    @@map("managerInfo")
+}
