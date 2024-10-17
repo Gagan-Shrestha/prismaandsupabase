@@ -108,10 +108,16 @@ const menuItems: MenuItem[] = [
         component: "setupBulkteacher",
       },
       {
-        titleKey: "Schedule",
+        titleKey: "Applicant",
         icon: <FaCalendarAlt />,
         link: "#",
-        component: "notification",
+        component: "setupApplicant",
+      },
+      {
+        titleKey: "Manager",
+        icon: <FaCalendarAlt />,
+        link: "#",
+        component: "setupManager",
       },
       {
         titleKey: "Analytics",
