@@ -222,22 +222,23 @@ enum ApplicationType {
     AbroadEnrollment
 }
 
-model ManagerInfo {
-    id                   Int       @id @default(sequence())
-    assetManagerInfoId   String    @unique @default(uuid())
-    userInId             String?   @unique
-    userId               String?
-    managerName          String?
-    managerPhone         String?
-    userName             String?   @unique
-    managerPassword      String?
-    linkedAccount        String?
-    managerEmail         String?   @unique
-    associatedLocation   String[]
-    managerPhoto         String?
-    fiscalYear           String?
-    createdAt            DateTime  @default(now())
-    lastUpdatedTimeStamp DateTime?
+model AssetType {
+    id          Int      @id @default(sequence())
+    assetTypeId String   @unique @default(uuid())
+    userId      String?
+    assetType   String?
+    createdAt   DateTime @default(now())
+    fiscalYear  String?
+}
 
-    @@map("managerInfo")
+model PropertyInfo {
+    id                Int      @id @default(sequence())
+    propertyId        String   @unique @default(uuid())
+    userId            String?
+    propertyName      String?
+    propertyAssetType String?
+    createdAt         DateTime @default(now())
+    fiscalYear        String?
+
+    @@map("propertyInfo")
 }
