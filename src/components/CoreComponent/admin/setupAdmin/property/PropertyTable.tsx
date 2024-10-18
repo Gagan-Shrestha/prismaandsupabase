@@ -7,55 +7,57 @@ import { IoMdAddCircle } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import useAssetManagerMutation from "./ManagerMutation";
 
 import SuccessNotification from "@/components/UIComponent/Notification/SuccessNotification";
 import FailedNotification from "@/components/UIComponent/Notification/FailedNotification";
-import useTeacherMutation from "./ManagerMutation";
-import { getTeacher } from "./ManagerServer";
+
 import ConfirmButton from "@/components/UIComponent/ConfirmButton";
 import Pagination from "@/components/UIComponent/Table/Pagination";
-import AddTeacher from "./AddManager";
-import { setUncaughtExceptionCaptureCallback } from "process";
-import AddManagerOption from "./AddManagerOption";
 
-const ManagerTable = () => {
-  const [teacherData, setTeacherData] = useState<any>([]);
-  const { deleteTeacherData } = useTeacherMutation();
+import { setUncaughtExceptionCaptureCallback } from "process";
+import usePropertyMutation from "./PropertyMutation";
+import { getAllProperty } from "./PropertyServer";
+import AddProperty from "./AddProperty";
+
+const PropertyTable = () => {
+  const [propertyData, setPropertyData] = useState<any>([]);
+  const { deletePropertyData } = usePropertyMutation();
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const {
-    data: getTeacherInfo,
+    data: getPropertyInfo,
     isError,
     isLoading,
   } = useQuery({
-    queryKey: ["teacher"],
-    queryFn: async () => getTeacher(),
+    queryKey: ["property"],
+    queryFn: async () => getAllProperty(),
   });
-  // Update teacher data when fetch is successful
+  // Update property data when fetch is successful
   useEffect(() => {
-    if (getTeacherInfo?.success && Array.isArray(getTeacherInfo?.success)) {
-      setTeacherData(getTeacherInfo.success); // Set data directly from API response
+    if (getPropertyInfo?.success && Array.isArray(getPropertyInfo?.success)) {
+      setPropertyData(getPropertyInfo.success); // Set data directly from API response
     } else {
-      setTeacherData([]); // Set an empty array if no data is found
+      setPropertyData([]); // Set an empty array if no data is found
     }
-  }, [getTeacherInfo]);
+  }, [getPropertyInfo]);
 
   // Handle data fetch errors
   useEffect(() => {
     if (isError) {
-      setErrorMessage("Failed to fetch teacher data.");
-      setTeacherData([]); // Set an empty array in case of error
+      setErrorMessage("Failed to fetch property data.");
+      setPropertyData([]); // Set an empty array in case of error
     }
   }, [isError]);
 
   // Filter employees based on search query
-  const filteredData = Array.isArray(teacherData)
-    ? teacherData.filter((teacher: any) =>
-        teacher?.teacherName?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredData = Array.isArray(propertyData)
+    ? propertyData.filter((property: any) =>
+        property?.propertyName
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase())
       )
     : [];
 
@@ -82,27 +84,27 @@ const ManagerTable = () => {
     }
   }, [successMessage, errorMessage]);
 
-  const [selectManager, setSelectManager] = useState<any>(null); // Track selected teacher for editing
-  const [managerId, setManagerId] = useState(""); // Holds the teacher data array
+  const [selectProperty, setSelectProperty] = useState<any>(null); // Track selected property for editing
+  const [propertyId, setPropertyId] = useState(""); // Holds the property data array
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleAddTeacher = () => {
-    setSelectManager(null);
+  const handleAddProperty = () => {
+    setSelectProperty(null);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectManager(null);
+    setSelectProperty(null);
   };
-  // Handle modal visibility for editing an existing teacher
-  const hanldeEditTeacher = (teacher: any) => {
-    setSelectManager(teacher);
-    setManagerId(teacher.managerId);
+  // Handle modal visibility for editing an existing property
+  const handleEditProperty = (property: any) => {
+    setSelectProperty(property);
+    setPropertyId(property.propertyId);
     setIsModalOpen(true);
   };
-  const handleDelete = async (managerId: string) => {
-    console.log("check delete", managerId);
-    const response = await deleteTeacherData(managerId);
+  const handleDelete = async (propertyId: string) => {
+    console.log("check delete", propertyId);
+    const response = await deletePropertyData(propertyId);
     if (response?.success) {
       setSuccessMessage(response?.success);
     } else if (response?.error) {
@@ -115,11 +117,13 @@ const ManagerTable = () => {
     <div>
       {/* Button to open the modal */}
       <div className="m-2 flex justify-end">
-        <AddManagerOption
-          buttonText="Add Managers"
-          modalTitle="Add New Manager"
-          modalDescription="How would you like to add new managers?"
-        />
+        <button
+          onClick={handleAddProperty}
+          className="bg-blue-700 flex space-x-2 text-xs mb-2 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300"
+        >
+          <IoMdAddCircle size={16} className="my-auto" />
+          <span>Add Property</span>
+        </button>
       </div>
 
       <div className="hidden md:block">
@@ -131,17 +135,12 @@ const ManagerTable = () => {
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
                       <th className="px-6 py-3 text-center text-xs font-semibold uppercase">
-                        Teacher Name
+                        PropertyName
                       </th>
                       <th className="px-6 py-3 text-center text-xs font-semibold uppercase">
-                        Teacher Email
+                        PropertyType
                       </th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold uppercase">
-                        Teacher Phone
-                      </th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold uppercase">
-                        Teacher Photo
-                      </th>
+
                       <th className="px-6 py-3 text-center text-xs font-semibold uppercase">
                         Action
                       </th>
@@ -155,32 +154,21 @@ const ManagerTable = () => {
                         </td>
                       </tr>
                     ) : (
-                      currentItems.map((teacher: any) => (
-                        <tr key={teacher.teacherInfoId}>
+                      currentItems.map((property: any) => (
+                        <tr key={property.teacherInfoId}>
                           <td className="whitespace-nowrap px-6 py-3 text-center text-xs font-medium">
-                            {teacher.teacherName}
+                            {property.propertyName}
                           </td>
                           <td className="whitespace-nowrap px-6 py-3 text-center text-xs font-medium">
-                            {teacher.teacherEmail}
+                            {property.propertyAssetType}
                           </td>
-                          <td className="whitespace-nowrap px-6 py-3 text-center text-xs font-medium">
-                            {teacher.teacherPhone}
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-3 text-center text-xs font-medium">
-                            <Image
-                              src={teacher?.teacherPhoto || "/placeholder.png"}
-                              alt="teacher Photo"
-                              className="w-16 h-16 rounded-lg"
-                              width={100}
-                              height={100}
-                            />
-                          </td>
+
                           <td className="whitespace-nowrap px-6 py-3 text-center text-xs font-medium">
                             <div className="flex justify-center space-x-2">
                               {" "}
                               <button
                                 className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                                onClick={() => hanldeEditTeacher(teacher)}
+                                onClick={() => handleEditProperty(property)}
                               >
                                 Edit
                               </button>
@@ -191,7 +179,7 @@ const ManagerTable = () => {
                                   "Are you sure you want to delete?"
                                 }
                                 buttonType="delete"
-                                userId={teacher?.teacherInfoId}
+                                userId={property?.propertyId}
                                 handleConfirm={(value) => handleDelete(value)}
                               />
                             </div>
@@ -215,15 +203,15 @@ const ManagerTable = () => {
           indexOfLastItem={indexOfLastItem}
         />
       </div>
-      {/* Modal for adding/editing teacher info */}
+      {/* Modal for adding/editing property info */}
       {isModalOpen && (
         <Modal onClose={handleCloseModal}>
           <div className="bg-white p-4">
-            <AddTeacher
-              teacher={selectManager}
-              teacherId={managerId}
-              isEditMode={!!selectManager}
-           
+            <AddProperty
+              property={selectProperty}
+              propertyId={propertyId}
+              isEditMode={!!selectProperty}
+              onSuccess={handleCloseModal}
             />
           </div>
         </Modal>
@@ -235,7 +223,7 @@ const ManagerTable = () => {
   );
 };
 
-export default ManagerTable;
+export default PropertyTable;
 
 // Modal Component
 const Modal: React.FC<{ onClose: () => void; children: ReactNode }> = ({
